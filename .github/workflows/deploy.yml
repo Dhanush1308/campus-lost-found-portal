@@ -1,0 +1,46 @@
+name: Campus Lost and Found - CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Step 1 - Checkout Source Code
+      uses: actions/checkout@v3
+
+    - name: Step 2 - Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Step 3 - Install Backend Dependencies
+      run: |
+        cd backend
+        npm install
+
+    - name: Step 4 - Run Unit Tests
+      run: |
+        cd backend
+        npm test
+
+    - name: Step 5 - Install Frontend Dependencies
+      run: |
+        cd frontend
+        npm install
+
+    - name: Step 6 - Build Frontend
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Step 7 - Pipeline Complete
+      run: |
+        echo "All tests passed!"
+        echo "Build successful!"
+        echo "Campus Lost and Found Portal - Ready"
