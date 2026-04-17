@@ -15,100 +15,154 @@ function App() {
   useEffect(() => { fetchItems(); }, []);
 
   const fetchItems = async () => {
-    const res = await axios.get(`${API}/items`);
-    setItems(res.data);
+    try {
+      const res = await axios.get(`${API}/items`);
+      setItems(res.data);
+    } catch (err) {
+      console.error("Failed to fetch items:", err);
+    }
   };
 
-  const handleSubmit = async () => {
-    await axios.post(`${API}/items`, form);
-    alert('Item reported successfully!');
-    fetchItems();
-    setActiveTab('home');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post(`${API}/items`, form);
+      alert('Item reported successfully!');
+      setForm({
+        title: '', description: '', category: 'Electronics',
+        type: 'lost', location: '', reportedBy: ''
+      });
+      fetchItems();
+      setActiveTab('home');
+    } catch (err) {
+      console.error("Failed to report item:", err);
+      alert('Failed to report item. Please try again.');
+    }
   };
 
   return (
-    <div style={{ fontFamily: 'Arial', maxWidth: '900px', margin: '0 auto', padding: '20px' }}>
-      <div style={{ background: '#1a237e', color: 'white', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-        <h1 style={{ margin: 0 }}>🔍 Campus Lost & Found Portal</h1>
-        <p style={{ margin: '5px 0 0' }}>Report and find lost items on campus</p>
-      </div>
+    <div className="App">
+      <header className="app-header">
+        <h1>🔍 Campus Lost & Found</h1>
+        <p>Report and find lost items on campus seamlessly</p>
+      </header>
 
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-        {['home', 'report'].map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)}
-            style={{ padding: '10px 20px', background: activeTab === tab ? '#1a237e' : '#e0e0e0',
-              color: activeTab === tab ? 'white' : 'black', border: 'none',
-              borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }}>
-            {tab === 'home' ? '🏠 All Items' : '➕ Report Item'}
-          </button>
-        ))}
-      </div>
+      <nav className="nav-bar">
+        <button 
+          className={`nav-btn ${activeTab === 'home' ? 'active' : ''}`}
+          onClick={() => setActiveTab('home')}
+        >
+          🏠 All Items
+        </button>
+        <button 
+          className={`nav-btn ${activeTab === 'report' ? 'active' : ''}`}
+          onClick={() => setActiveTab('report')}
+        >
+          ➕ Report Item
+        </button>
+      </nav>
 
       {activeTab === 'home' && (
-        <div>
-          <h2>All Reported Items ({items.length})</h2>
-          {items.length === 0 && <p style={{ color: '#999' }}>No items reported yet.</p>}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-            {items.map(item => (
-              <div key={item._id} style={{ border: '1px solid #ddd', borderRadius: '8px', padding: '15px' }}>
-                <span style={{ background: item.type === 'lost' ? '#ffebee' : '#e8f5e9',
-                  color: item.type === 'lost' ? '#c62828' : '#2e7d32',
-                  padding: '3px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>
-                  {item.type.toUpperCase()}
-                </span>
-                <h3 style={{ margin: '10px 0 5px' }}>{item.title}</h3>
-                <p style={{ margin: '0 0 5px', color: '#555' }}>{item.description}</p>
-                <p style={{ margin: 0, fontSize: '13px', color: '#777' }}>
-                  📍 {item.location} | 🏷️ {item.category}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <main className="content-area">
+          <h2 className="section-title">All Reported Items ({items.length})</h2>
+          {items.length === 0 ? (
+            <div className="empty-state glass-panel">
+              <p>No items reported yet. It's a good day!</p>
+            </div>
+          ) : (
+            <div className="items-grid">
+              {items.map(item => (
+                <article key={item._id} className="item-card glass-panel">
+                  <div className="item-header">
+                    <h3 className="item-title">{item.title}</h3>
+                    <span className={`badge ${item.type}`}>
+                      {item.type}
+                    </span>
+                  </div>
+                  <p className="item-desc">{item.description}</p>
+                  <div className="item-meta">
+                    <span className="meta-item" title="Location">
+                      📍 {item.location}
+                    </span>
+                    <span className="meta-item" title="Category">
+                      🏷️ {item.category}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </main>
       )}
 
       {activeTab === 'report' && (
-        <div style={{ background: '#f5f5f5', padding: '20px', borderRadius: '8px' }}>
-          <h2>Report a Lost / Found Item</h2>
-          {[
-            { label: 'Your Name', key: 'reportedBy', type: 'text' },
-            { label: 'Item Title', key: 'title', type: 'text' },
-            { label: 'Description', key: 'description', type: 'text' },
-            { label: 'Location', key: 'location', type: 'text' },
-          ].map(({ label, key, type }) => (
-            <div key={key} style={{ marginBottom: '15px' }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>{label}</label>
-              <input type={type} value={form[key]}
-                onChange={e => setForm({ ...form, [key]: e.target.value })}
-                style={{ width: '100%', padding: '10px', border: '1px solid #ddd',
-                  borderRadius: '5px', boxSizing: 'border-box' }} />
-            </div>
-          ))}
-          <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Category</label>
-              <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}
-                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}>
-                {['Electronics', 'Books', 'Keys', 'Bag', 'ID Card', 'Wallet', 'Other'].map(c =>
-                  <option key={c}>{c}</option>)}
-              </select>
-            </div>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>Type</label>
-              <select value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}
-                style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '5px' }}>
-                <option value="lost">Lost</option>
-                <option value="found">Found</option>
-              </select>
-            </div>
+        <main className="content-area">
+          <div className="report-form glass-panel">
+            <h2 className="section-title">Report a Lost or Found Item</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="form-grid">
+                {[
+                  { label: 'Your Name', key: 'reportedBy', type: 'text', placeholder: 'John Doe' },
+                  { label: 'Item Title', key: 'title', type: 'text', placeholder: 'e.g., Blue Yeti Mug' },
+                  { label: 'Location', key: 'location', type: 'text', placeholder: 'e.g., Library 2nd Floor' },
+                ].map(({ label, key, type, placeholder }) => (
+                  <div key={key} className="form-group">
+                    <label>{label}</label>
+                    <input 
+                      type={type} 
+                      className="form-control"
+                      placeholder={placeholder}
+                      value={form[key]}
+                      onChange={e => setForm({ ...form, [key]: e.target.value })}
+                      required
+                    />
+                  </div>
+                ))}
+                
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea 
+                    className="form-control"
+                    placeholder="Provide detailed description..."
+                    rows="3"
+                    value={form.description}
+                    onChange={e => setForm({ ...form, description: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="form-grid two-cols">
+                <div className="form-group">
+                  <label>Category</label>
+                  <select 
+                    className="form-control"
+                    value={form.category} 
+                    onChange={e => setForm({ ...form, category: e.target.value })}
+                  >
+                    {['Electronics', 'Books', 'Keys', 'Bag', 'ID Card', 'Wallet', 'Other'].map(c =>
+                      <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Type</label>
+                  <select 
+                    className="form-control"
+                    value={form.type} 
+                    onChange={e => setForm({ ...form, type: e.target.value })}
+                  >
+                    <option value="lost">Lost</option>
+                    <option value="found">Found</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button type="submit" className="submit-btn">
+                Submit Report
+              </button>
+            </form>
           </div>
-          <button onClick={handleSubmit}
-            style={{ background: '#1a237e', color: 'white', border: 'none',
-              padding: '12px 30px', borderRadius: '5px', cursor: 'pointer',
-              fontSize: '16px', fontWeight: 'bold' }}>
-            Submit Report
-          </button>
-        </div>
+        </main>
       )}
     </div>
   );
