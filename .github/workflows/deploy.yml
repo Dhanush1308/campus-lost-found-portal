@@ -27,7 +27,7 @@ jobs:
     - name: Step 4 - Run Unit Tests
       run: |
         cd backend
-        npm test
+        npx jest --forceExit --verbose
 
     - name: Step 5 - Install Frontend Dependencies
       run: |
