@@ -1,0 +1,12 @@
+echo "# Campus Lost and Found Portal
+A web application for VIT campus to report and find lost items.
+## Tech Stack
+- Frontend: React.js
+- Backend: Node.js + Express
+- Database: MongoDB Atlas
+- Cloud: AWS
+## How to Run
+### Backend
+cd backend && npm install && node server.js
+### Frontend
+cd frontend && npm install && npm start"
