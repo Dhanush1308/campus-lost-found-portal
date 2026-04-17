@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-const API = 'https://campus-lost-found-backend-ugok.onrender.com';
+const API = 'http://localhost:5000/api';
 
 function App() {
   const [items, setItems] = useState([]);
